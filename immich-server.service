@@ -1,0 +1,44 @@
+[Unit]
+Description=Immich server
+Documentation=https://github.com/immich-app/immich
+Requires=redis.service
+Requires=postgresql.service
+Requires=typesense-server.service
+After=network.target
+Wants=network-online.target
+After=network-online.target
+
+# for convenience, all services start with immich-server
+BindsTo=immich-microservices.service immich-web.service immich-machine-learning.service
+After=immich-microservices.service immich-web.service immich-machine-learning.service
+
+[Service]
+User=immich
+Group=immich
+Type=simple
+Restart=on-failure
+
+EnvironmentFile=/etc/immich.conf
+Environment=NODE_ENV=production
+SyslogIdentifier=immich-server
+ExecStart=node dist/main immich
+
+PrivateDevices=true
+ProtectHome=true
+ProtectSystem=strict
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectControlGroups=yes
+
+RestrictNamespaces=yes
+
+SystemCallArchitectures=native
+AmbientCapabilities=
+CapabilityBoundingSet=
+NoNewPrivileges=yes
+
+WorkingDirectory=/usr/lib/immich/app/server
+ReadWritePaths=/tmp /var/tmp /var/lib/immich/upload
+
+[Install]
+WantedBy=multi-user.target

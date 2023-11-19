@@ -1,0 +1,41 @@
+[Unit]
+Description=Immich microservices
+Documentation=https://github.com/immich-app/immich
+Requires=typesense-server.service
+Requires=postgresql.service
+Requires=immich-server.service
+After=network.target
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+User=immich
+Group=immich
+Type=simple
+Restart=on-failure
+
+EnvironmentFile=/etc/immich.conf
+Environment=NODE_ENV=production
+SyslogIdentifier=immich-microservices
+ExecStart=node dist/main microservices
+
+#needed for vaapi acceleration
+#PrivateDevices=true
+ProtectHome=true
+ProtectSystem=strict
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectControlGroups=yes
+
+RestrictNamespaces=yes
+
+SystemCallArchitectures=native
+AmbientCapabilities=
+CapabilityBoundingSet=
+NoNewPrivileges=yes
+
+WorkingDirectory=/usr/lib/immich/app/server
+ReadWritePaths=/tmp /var/tmp /var/lib/immich/upload /var/lib/immich/.reverse-geocoding-dump
+
+[Install]
+WantedBy=multi-user.target
